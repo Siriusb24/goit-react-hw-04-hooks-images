@@ -1,4 +1,4 @@
-import React, { Component } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import SearchBar from './components/Searchbar/Searchbar';
 import ImageGallery from './components/ImageGallery/ImageGallery';
@@ -8,106 +8,103 @@ import Spinner from './components/Spinner/Spinner';
 import fetchImages from './services/apiServices';
 import './App.css';
 
-class App extends Component {
-  state = {
-    modalContent: '',
-    searchQuery: '',
-    page: 1,
-    visibleImages: [],
-    isLoading: false,
-    openModal: false,
-    error: null,
-    id:''
-  };
+function App () {
+  const [modalContent, setModalContent] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [page, setPage] = useState(1);
+  const [visibleImages, setVisibleImages] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [openModal, setOpenModal] = useState(false);
+  const [error, setError] = useState(null);
+  const [id, setId] = useState('');
+  
 
-  componentDidUpdate(prevProps, { searchQuery, page }) {
-    if (searchQuery !== this.state.searchQuery) {
-      this.getData();
+  
+  
+  useEffect((searchQuery, page) => {
+    
+    if (searchQuery !== searchQuery) {
+    getData();
     }
 
-    if (page !== this.state.page) {
-      this.getData();
-    }
+    if (page !== page) {
+    getData();
+    
+  console.log(getData())
   }
+    }, [searchQuery,page]);
+  
 
-  toggleModal = () => {
-    this.setState(({ openModal }) => ({ openModal: !openModal }));
+  const toggleModal = () => {
+    setOpenModal(openModal => ({ openModal: !openModal }));
   };
 
-  toggleLoading = () => {
-    this.setState(({ isLoading }) => ({ isLoading: !isLoading }));
+  const toggleLoading = () => {
+    setIsLoading(isLoading => ({ isLoading: !isLoading }));
   };
 
-  hadleChangeQuery = query => {
-    this.setState({
-      searchQuery: query,
-      page: 1,
-      visibleImages: [],
-    });
+  const hadleChangeQuery = query => {
+    if (query === searchQuery) {
+      return;
+    }
+    setSearchQuery(query);
+    setVisibleImages([]);
+    setPage(1);
   };
 
-  handleNextPage = () => {
-    this.setState(({ page }) => {
-      return {
-        page: page + 1,
-      };
-    });
+  const handleNextPage = () => {
+    setPage(page => page+1)
   };
 
-  handleScroll = () => {
+  const handleScroll = () => {
     window.scrollTo({
       top: document.documentElement.scrollHeight,
       behavior: 'smooth',
     });
   };
 
-  modalContentSet = itemId => {
-    const { visibleImages } = this.state;
+  const modalContentSet = itemId => {
     const element = visibleImages.find(({ id }) => id === itemId);
-    this.setState({ modalContent: element.largeImageURL });
+    setModalContent(modalContent => element.largeImageURL);
   };
 
-  getData = async () => {
-    const { searchQuery, page } = this.state;
-    this.toggleLoading();
+  const getData = async () => {
+    toggleLoading();
     try {
       const {hits} = await fetchImages(searchQuery, page);
-        this.setState(({ visibleImages }) => {
+        setVisibleImages(visibleImages => {
           console.log(hits)
           return { visibleImages: [...visibleImages, ...hits] };
         });
-        this.handleScroll()
+        handleScroll()
       }catch (error){ 
         console.log('Smth wrong with App fetch', error);
       } finally{
-        this.toggleLoading()}
+        toggleLoading()}
   };
 
-  render() {
-    const { visibleImages, openModal, modalContent, isLoading, page, id} =
-      this.state;
-    const isNotLastPage = visibleImages.length / page === 12;
-    const btnEnable = visibleImages.length > 0 && !isLoading && isNotLastPage;
+  const isNotLastPage = visibleImages.length / page === 12;
+  const btnEnable = visibleImages.length > 0 && !isLoading && isNotLastPage;
+
     return (
       <div className="App">
-        <SearchBar onSubmit={this.hadleChangeQuery} />
+        <SearchBar onSubmit={hadleChangeQuery} />
 
         <ImageGallery
           key={id}
           images={visibleImages}
-          onClick={this.toggleModal}
-          onItemClick={this.modalContentSet}
+          onClick={toggleModal}
+          onItemClick={modalContentSet}
           name={`Load more`}
         />
 
         {openModal && (
-          <Modal content={modalContent} onBackdrop={this.toggleModal} />
+          <Modal content={modalContent} onBackdrop={toggleModal} />
         )}
         {isLoading && <Spinner />}
-        {btnEnable && <Button name="Load more" onPress={this.handleNextPage} />}
+        {btnEnable && <Button name="Load more" onPress={handleNextPage} />}
       </div>
     );
-  }
 }
 
 export default App;
