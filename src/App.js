@@ -19,28 +19,21 @@ function App () {
   const [id, setId] = useState('');
   
 
-  
-  
-  useEffect((searchQuery, page) => {
+  useEffect(() => {
     
-    if (searchQuery !== searchQuery) {
-    getData();
+    if (searchQuery !== '' && page !== 0) {
+     getData();
     }
 
-    if (page !== page) {
-    getData();
-    
-  console.log(getData())
-  }
-    }, [searchQuery,page]);
+    }, [searchQuery, page]);// eslint-disable-line react-hooks/exhaustive-deps
   
 
   const toggleModal = () => {
-    setOpenModal(openModal => ({ openModal: !openModal }));
+    setOpenModal(openModal => !openModal);
   };
 
   const toggleLoading = () => {
-    setIsLoading(isLoading => ({ isLoading: !isLoading }));
+    setIsLoading(isLoading => !isLoading);
   };
 
   const hadleChangeQuery = query => {
@@ -68,19 +61,14 @@ function App () {
     setModalContent(modalContent => element.largeImageURL);
   };
 
-  const getData = async () => {
-    toggleLoading();
-    try {
-      const {hits} = await fetchImages(searchQuery, page);
-        setVisibleImages(visibleImages => {
-          console.log(hits)
-          return { visibleImages: [...visibleImages, ...hits] };
-        });
-        handleScroll()
-      }catch (error){ 
-        console.log('Smth wrong with App fetch', error);
-      } finally{
-        toggleLoading()}
+  const getData = () => {
+   toggleLoading();
+   fetchImages(searchQuery, page, error).then(({ hits}) => {
+        setVisibleImages(visibleImages => [...visibleImages, ...hits]);
+        console.log({hits})  
+        handleScroll();
+        }).catch (error =>  setError(error))
+      .finally(() => toggleLoading()) 
   };
 
   const isNotLastPage = visibleImages.length / page === 12;

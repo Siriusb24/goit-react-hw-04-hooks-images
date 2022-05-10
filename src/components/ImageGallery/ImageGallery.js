@@ -3,7 +3,7 @@ import PropTypes from 'prop-types';
 import s from './ImageGallery.module.css';
 import ImageGalleryItem from '../ImageGalleryItem/ImageGalleryItem';
 
-const  ImageGallery = ({ images, onItemClick, onClick, id }) => {
+const  ImageGallery = ({ images, onItemClick, onClick, id}) => {
   const handleOpenModal = e => {
     if (e.target !== e.currentTarget) {
       onClick();
@@ -14,7 +14,7 @@ const  ImageGallery = ({ images, onItemClick, onClick, id }) => {
       <ul className={s.ImageGallery} onClick={handleOpenModal}>
         {images &&
           images.map(image => (
-            <li key={id} className={s.ImageGalleryItem}>
+            <li key={image.id} className={s.ImageGalleryItem} >
               <ImageGalleryItem {...image} onItemClick={onItemClick} />
             </li>
           ))}
